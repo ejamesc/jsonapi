@@ -6,7 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/google/jsonapi"
+	"github.com/ejamesc/jsonapi"
 )
 
 func TestExampleHandler_post(t *testing.T) {
