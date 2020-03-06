@@ -3,6 +3,7 @@ package jsonapi
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"reflect"
@@ -851,6 +852,38 @@ func TestUnmarshalCustomTypeAttributes_ErrInvalidType(t *testing.T) {
 
 	if err != ErrInvalidType {
 		t.Fatalf("Expected error to be %v, was %v", ErrInvalidType, err)
+	}
+}
+
+func TestUnmarshalCustomTypeAttributes_ErrInvalidResourceObjType(t *testing.T) {
+	data := map[string]interface{}{
+		"data": map[string]interface{}{
+			"type": "completelywrongobjecttype",
+			"id":   "1",
+			"attributes": map[string]interface{}{
+				"int":        5,
+				"intptr":     5,
+				"intptrnull": nil,
+
+				"float":  1.5,
+				"string": "Test",
+			},
+		},
+	}
+	payload, err := json.Marshal(data)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Parse JSON API payload
+	customAttributeTypes := new(CustomAttributeTypes)
+	err = UnmarshalPayload(bytes.NewReader(payload), customAttributeTypes)
+	if err == nil {
+		t.Fatal("Expected an error unmarshalling the payload due to type mismatch, got none")
+	}
+
+	if !errors.Is(err, ErrInvalidResourceObjectType) {
+		t.Fatalf("Expected error to be %v, was %v", ErrInvalidResourceObjectType, err)
 	}
 }
 

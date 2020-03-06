@@ -29,7 +29,8 @@ var (
 	ErrUnknownFieldNumberType = errors.New("The struct field was not of a known number type")
 	// ErrInvalidType is returned when the given type is incompatible with the expected type.
 	ErrInvalidType = errors.New("Invalid type provided") // I wish we used punctuation.
-
+	// ErrInvalidResourceObjectType is returned when the payload's resource type is incompatible with the struct that you want to unmarshal to.
+	ErrInvalidResourceObjectType = errors.New("Invalid resource object type")
 )
 
 // ErrUnsupportedPtrType is returned when the Struct field was a pointer but
@@ -182,9 +183,10 @@ func unmarshalNode(data *Node, model reflect.Value, included *map[string]*Node) 
 			// Check the JSON API Type
 			if data.Type != args[1] {
 				er = fmt.Errorf(
-					"Trying to Unmarshal an object of type %#v, but %#v does not match",
+					"Trying to Unmarshal an object of type %#v, but %#v does not match: %w",
 					data.Type,
 					args[1],
+					ErrInvalidResourceObjectType,
 				)
 				break
 			}
