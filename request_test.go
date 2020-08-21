@@ -1340,6 +1340,72 @@ func TestUnmarshalNestedStructSlice(t *testing.T) {
 	}
 }
 
+func TestUnmarshalNestedStructSlicePtr(t *testing.T) {
+	fry := map[string]interface{}{
+		"firstname": "Philip J.",
+		"surname":   "Fry",
+		"age":       25,
+		"hired-at":  "2016-08-17T08:27:12Z",
+	}
+
+	bender := map[string]interface{}{
+		"firstname": "Bender Bending",
+		"surname":   "Rodriguez",
+		"age":       19,
+		"hired-at":  "2016-08-17T08:27:12Z",
+	}
+
+	deliveryCrew := map[string]interface{}{
+		"name": "Delivery Crew",
+		"members": []interface{}{
+			fry,
+			bender,
+		},
+	}
+
+	serialNos := []interface{}{
+		123,
+		145,
+	}
+
+	sample := map[string]interface{}{
+		"data": map[string]interface{}{
+			"type": "companies",
+			"id":   "123",
+			"attributes": map[string]interface{}{
+				"name": "Planet Express",
+				"teams": []interface{}{
+					deliveryCrew,
+				},
+				"serial_nos": serialNos,
+			},
+		},
+	}
+
+	data, err := json.Marshal(sample)
+	if err != nil {
+		t.Fatal(err)
+	}
+	in := bytes.NewReader(data)
+	out := new(CompanyPtr)
+
+	if err := UnmarshalPayload(in, out); err != nil {
+		t.Fatal(err)
+	}
+
+	if out.Teams[0].Name != "Delivery Crew" {
+		t.Fatalf("Nested struct not unmarshalled: Expected `Delivery Crew` but got `%s`", out.Teams[0].Name)
+	}
+
+	if len(out.Teams[0].Members) != 2 {
+		t.Fatalf("Nested struct not unmarshalled: Expected to have `2` Members but got `%d`",
+			len(out.Teams[0].Members))
+	}
+
+	if out.Teams[0].Members[0].Firstname != "Philip J." {
+		t.Fatalf("Nested struct not unmarshalled: Expected `Philip J.` but got `%s`",
+			out.Teams[0].Members[0].Firstname)
+	}
 type MyCustomAttribute struct {
 	Field string
 }

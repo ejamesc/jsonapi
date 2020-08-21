@@ -164,6 +164,15 @@ type Company struct {
 	FoundedAt time.Time `jsonapi:"attr,founded-at,iso8601"`
 }
 
+type CompanyPtr struct {
+	ID        string    `jsonapi:"primary,companies"`
+	Name      string    `jsonapi:"attr,name"`
+	Boss      Employee  `jsonapi:"attr,boss"`
+	Teams     []*Team   `jsonapi:"attr,teams"`
+	SerialNos []*int    `jsonapi:"attr,serial_nos"`
+	FoundedAt time.Time `jsonapi:"attr,founded-at,iso8601"`
+}
+
 type Team struct {
 	Name    string     `jsonapi:"attr,name"`
 	Leader  *Employee  `jsonapi:"attr,leader"`

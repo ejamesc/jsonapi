@@ -414,10 +414,20 @@ func unmarshalAttribute(
 	}
 
 	// Handle field containing slice of structs
-	if fieldValue.Type().Kind() == reflect.Slice &&
-		reflect.TypeOf(fieldValue.Interface()).Elem().Kind() == reflect.Struct {
-		value, err = handleStructSlice(attribute, fieldValue)
-		return
+	if fieldValue.Type().Kind() == reflect.Slice {
+		// if it's a struct
+		if reflect.TypeOf(fieldValue.Interface()).Elem().Kind() == reflect.Struct {
+			value, err = handleStructSlice(attribute, fieldValue)
+			return
+		}
+
+		// if it's a pointer to a struct
+		if reflect.TypeOf(fieldValue.Interface()).Elem().Kind() == reflect.Ptr {
+			if reflect.TypeOf(fieldValue).Kind() == reflect.Struct {
+				value, err = handlePtrStructSlice(attribute, args, fieldType, fieldValue, structField)
+				return
+			}
+		}
 	}
 
 	// JSON value was a float (numeric)
@@ -658,6 +668,31 @@ func handleStructSlice(
 		}
 
 		models = reflect.Append(models, reflect.Indirect(value))
+	}
+
+	return models, nil
+}
+
+func handlePtrStructSlice(
+	attribute interface{},
+	args []string,
+	fieldType reflect.Type,
+	fieldValue reflect.Value,
+	structField reflect.StructField) (reflect.Value, error) {
+
+	models := reflect.New(fieldValue.Type()).Elem()
+	dataMap := reflect.ValueOf(attribute).Interface().([]interface{})
+
+	for _, data := range dataMap {
+		model := reflect.New(fieldValue.Type().Elem()).Elem()
+
+		value, err := handlePointer(data, args, fieldType, model, structField)
+
+		if err != nil {
+			continue
+		}
+
+		models = reflect.Append(models, value)
 	}
 
 	return models, nil
