@@ -1406,6 +1406,21 @@ func TestUnmarshalNestedStructSlicePtr(t *testing.T) {
 		t.Fatalf("Nested struct not unmarshalled: Expected `Philip J.` but got `%s`",
 			out.Teams[0].Members[0].Firstname)
 	}
+
+	// TODO: we do not currently handle pointers to ints
+	// If this is a problem, check this:
+	// https://github.com/google/jsonapi/pull/129
+	// if len(out.SerialNos) != 2 {
+	//	t.Fatalf("SerialNos not unmarshalled: Expected `2` *int items but got `%d`",
+	//		len(out.SerialNos))
+	//}
+
+	//if *out.SerialNos[0] != 123 {
+	//	t.Fatalf("Nested int not unmarshalled: Expected `123` but got `%d`",
+	//		*out.SerialNos[0])
+	//}
+}
+
 type MyCustomAttribute struct {
 	Field string
 }
